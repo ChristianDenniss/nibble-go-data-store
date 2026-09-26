@@ -6,6 +6,8 @@ github.com/ChristianDenniss/go-data-model v1.5.0 h1:R1RPGPV6WTUBVjtb+seCorUcp4Hi
 github.com/ChristianDenniss/go-data-model v1.5.0/go.mod h1:D9AfdKTWYXijlISIB1EUqp6bq7+yKnEuopVYX564CHA=
 github.com/ChristianDenniss/go-data-model v1.6.0 h1:/sD9x7XMzT84ewkHuFCX8+S3c8fDj2QySCGfcUrSPok=
 github.com/ChristianDenniss/go-data-model v1.6.0/go.mod h1:D9AfdKTWYXijlISIB1EUqp6bq7+yKnEuopVYX564CHA=
+github.com/ChristianDenniss/go-data-model v1.7.0 h1:waZypF9y64a70uxtffug7gMUkmXZgcOKTgSzhLcIvh8=
+github.com/ChristianDenniss/go-data-model v1.7.0/go.mod h1:D9AfdKTWYXijlISIB1EUqp6bq7+yKnEuopVYX564CHA=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
