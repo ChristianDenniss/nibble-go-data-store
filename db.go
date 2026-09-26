@@ -55,6 +55,14 @@ func (db *DB) Ping(ctx context.Context) error {
 }
 
 func (db *DB) migrate(ctx context.Context) error {
+	if _, err := db.sql.ExecContext(ctx, `
+		CREATE TABLE IF NOT EXISTS schema_migrations (
+			filename text PRIMARY KEY,
+			applied_at timestamptz NOT NULL DEFAULT now()
+		)`); err != nil {
+		return fmt.Errorf("migrations: create ledger: %w", err)
+	}
+
 	files, err := fs.Glob(migrations.FS, "*.sql")
 	if err != nil {
 		return fmt.Errorf("migrations: %w", err)
@@ -65,6 +73,16 @@ func (db *DB) migrate(ctx context.Context) error {
 	}
 	log.Printf("postgres: applying %d migration file(s)", len(files))
 	for _, name := range files {
+		var applied string
+		err := db.sql.QueryRowContext(ctx, `SELECT filename FROM schema_migrations WHERE filename = $1`, name).Scan(&applied)
+		if err == nil {
+			log.Printf("postgres: migration %s already applied", name)
+			continue
+		}
+		if err != sql.ErrNoRows {
+			return fmt.Errorf("migrations: lookup %s: %w", name, err)
+		}
+
 		log.Printf("postgres: migration %s starting", name)
 		sqlBytes, err := fs.ReadFile(migrations.FS, name)
 		if err != nil {
@@ -73,6 +91,9 @@ func (db *DB) migrate(ctx context.Context) error {
 		if _, err := db.sql.ExecContext(ctx, string(sqlBytes)); err != nil {
 			log.Printf("postgres: migration %s failed: %v", name, err)
 			return fmt.Errorf("migration %s: %w", name, err)
+		}
+		if _, err := db.sql.ExecContext(ctx, `INSERT INTO schema_migrations (filename) VALUES ($1)`, name); err != nil {
+			return fmt.Errorf("migrations: record %s: %w", name, err)
 		}
 		log.Printf("postgres: migration %s ok", name)
 	}
