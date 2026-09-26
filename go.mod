@@ -1,4 +1,4 @@
-module github.com/ChristianDenniss/go-postgres
+module github.com/ChristianDenniss/go-data-store
 
 go 1.23
 

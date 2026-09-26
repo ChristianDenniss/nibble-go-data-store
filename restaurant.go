@@ -5,11 +5,12 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/ChristianDenniss/go-data-model/location"
-	"github.com/ChristianDenniss/go-data-model/restaurant"
+	location "github.com/ChristianDenniss/go-data-model/location/entity"
+	"github.com/ChristianDenniss/go-data-model/restaurant/entity"
+	"github.com/ChristianDenniss/go-data-model/restaurant/repository"
 )
 
-var _ restaurant.Repository = (*RestaurantRepository)(nil)
+var _ repository.Repository = (*RestaurantRepository)(nil)
 
 type RestaurantRepository struct {
 	db *DB
@@ -27,8 +28,8 @@ type restaurantRow struct {
 	Address   string
 }
 
-func (row restaurantRow) toDomain() restaurant.Restaurant {
-	return restaurant.Restaurant{
+func (row restaurantRow) toDomain() entity.Restaurant {
+	return entity.Restaurant{
 		ID:   row.ID,
 		Name: row.Name,
 		Location: location.Location{
@@ -39,22 +40,22 @@ func (row restaurantRow) toDomain() restaurant.Restaurant {
 	}
 }
 
-func (r *RestaurantRepository) GetByID(ctx context.Context, id string) (restaurant.Restaurant, error) {
+func (r *RestaurantRepository) GetByID(ctx context.Context, id string) (entity.Restaurant, error) {
 	var row restaurantRow
 	err := r.db.sql.QueryRowContext(ctx, `
 		SELECT id, name, latitude, longitude, address
 		FROM restaurants
 		WHERE id = $1`, id).Scan(&row.ID, &row.Name, &row.Latitude, &row.Longitude, &row.Address)
 	if errors.Is(err, sql.ErrNoRows) {
-		return restaurant.Restaurant{}, restaurant.ErrNotFound
+		return entity.Restaurant{}, entity.ErrNotFound
 	}
 	if err != nil {
-		return restaurant.Restaurant{}, err
+		return entity.Restaurant{}, err
 	}
 	return row.toDomain(), nil
 }
 
-func (r *RestaurantRepository) Upsert(ctx context.Context, in restaurant.Restaurant) error {
+func (r *RestaurantRepository) Upsert(ctx context.Context, in entity.Restaurant) error {
 	_, err := r.db.sql.ExecContext(ctx, `
 		INSERT INTO restaurants (id, name, latitude, longitude, address)
 		VALUES ($1, $2, $3, $4, $5)

@@ -9,7 +9,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/ChristianDenniss/go-postgres/migrations"
+	"github.com/ChristianDenniss/go-data-store/migrations"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 

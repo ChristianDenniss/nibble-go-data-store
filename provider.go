@@ -5,10 +5,11 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/ChristianDenniss/go-data-model/provider"
+	"github.com/ChristianDenniss/go-data-model/provider/entity"
+	"github.com/ChristianDenniss/go-data-model/provider/repository"
 )
 
-var _ provider.Repository = (*ProviderRepository)(nil)
+var _ repository.Repository = (*ProviderRepository)(nil)
 
 type ProviderRepository struct {
 	db *DB
@@ -23,26 +24,26 @@ type providerRow struct {
 	Name string
 }
 
-func (row providerRow) toDomain() provider.Provider {
-	return provider.Provider{ID: row.ID, Name: row.Name}
+func (row providerRow) toDomain() entity.Provider {
+	return entity.Provider{ID: row.ID, Name: row.Name}
 }
 
-func (r *ProviderRepository) GetByID(ctx context.Context, id string) (provider.Provider, error) {
+func (r *ProviderRepository) GetByID(ctx context.Context, id string) (entity.Provider, error) {
 	var row providerRow
 	err := r.db.sql.QueryRowContext(ctx, `
 		SELECT id, name
 		FROM providers
 		WHERE id = $1`, id).Scan(&row.ID, &row.Name)
 	if errors.Is(err, sql.ErrNoRows) {
-		return provider.Provider{}, provider.ErrNotFound
+		return entity.Provider{}, entity.ErrNotFound
 	}
 	if err != nil {
-		return provider.Provider{}, err
+		return entity.Provider{}, err
 	}
 	return row.toDomain(), nil
 }
 
-func (r *ProviderRepository) Upsert(ctx context.Context, p provider.Provider) error {
+func (r *ProviderRepository) Upsert(ctx context.Context, p entity.Provider) error {
 	_, err := r.db.sql.ExecContext(ctx, `
 		INSERT INTO providers (id, name)
 		VALUES ($1, $2)

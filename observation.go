@@ -6,11 +6,12 @@ import (
 	"errors"
 	"time"
 
-	"github.com/ChristianDenniss/go-data-model/money"
-	"github.com/ChristianDenniss/go-data-model/observation"
+	money "github.com/ChristianDenniss/go-data-model/money/entity"
+	"github.com/ChristianDenniss/go-data-model/observation/entity"
+	"github.com/ChristianDenniss/go-data-model/observation/repository"
 )
 
-var _ observation.Repository = (*ObservationRepository)(nil)
+var _ repository.Repository = (*ObservationRepository)(nil)
 
 type ObservationRepository struct {
 	db *DB
@@ -28,8 +29,8 @@ type observationRow struct {
 	ObservedAt  time.Time
 }
 
-func (row observationRow) toDomain() observation.Observation {
-	return observation.Observation{
+func (row observationRow) toDomain() entity.Observation {
+	return entity.Observation{
 		ID:      row.ID,
 		OfferID: row.OfferID,
 		Price: money.Money{
@@ -40,7 +41,7 @@ func (row observationRow) toDomain() observation.Observation {
 	}
 }
 
-func (r *ObservationRepository) GetByID(ctx context.Context, id string) (observation.Observation, error) {
+func (r *ObservationRepository) GetByID(ctx context.Context, id string) (entity.Observation, error) {
 	var row observationRow
 	err := r.db.sql.QueryRowContext(ctx, `
 		SELECT id, offer_id, amount_cents, currency, observed_at
@@ -48,15 +49,15 @@ func (r *ObservationRepository) GetByID(ctx context.Context, id string) (observa
 		WHERE id = $1`, id).Scan(
 		&row.ID, &row.OfferID, &row.AmountCents, &row.Currency, &row.ObservedAt)
 	if errors.Is(err, sql.ErrNoRows) {
-		return observation.Observation{}, observation.ErrNotFound
+		return entity.Observation{}, entity.ErrNotFound
 	}
 	if err != nil {
-		return observation.Observation{}, err
+		return entity.Observation{}, err
 	}
 	return row.toDomain(), nil
 }
 
-func (r *ObservationRepository) Upsert(ctx context.Context, obs observation.Observation) error {
+func (r *ObservationRepository) Upsert(ctx context.Context, obs entity.Observation) error {
 	_, err := r.db.sql.ExecContext(ctx, `
 		INSERT INTO price_observations (id, offer_id, amount_cents, currency, observed_at)
 		VALUES ($1, $2, $3, $4, $5)

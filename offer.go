@@ -5,11 +5,12 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/ChristianDenniss/go-data-model/money"
-	"github.com/ChristianDenniss/go-data-model/offer"
+	money "github.com/ChristianDenniss/go-data-model/money/entity"
+	"github.com/ChristianDenniss/go-data-model/offer/entity"
+	"github.com/ChristianDenniss/go-data-model/offer/repository"
 )
 
-var _ offer.Repository = (*OfferRepository)(nil)
+var _ repository.Repository = (*OfferRepository)(nil)
 
 type OfferRepository struct {
 	db *DB
@@ -28,8 +29,8 @@ type offerRow struct {
 	Currency     string
 }
 
-func (row offerRow) toDomain() offer.Offer {
-	return offer.Offer{
+func (row offerRow) toDomain() entity.Offer {
+	return entity.Offer{
 		ID:           row.ID,
 		RestaurantID: row.RestaurantID,
 		ProviderID:   row.ProviderID,
@@ -41,7 +42,7 @@ func (row offerRow) toDomain() offer.Offer {
 	}
 }
 
-func (r *OfferRepository) GetByID(ctx context.Context, id string) (offer.Offer, error) {
+func (r *OfferRepository) GetByID(ctx context.Context, id string) (entity.Offer, error) {
 	var row offerRow
 	err := r.db.sql.QueryRowContext(ctx, `
 		SELECT id, restaurant_id, provider_id, menu_item_id, amount_cents, currency
@@ -49,15 +50,15 @@ func (r *OfferRepository) GetByID(ctx context.Context, id string) (offer.Offer, 
 		WHERE id = $1`, id).Scan(
 		&row.ID, &row.RestaurantID, &row.ProviderID, &row.MenuItemID, &row.AmountCents, &row.Currency)
 	if errors.Is(err, sql.ErrNoRows) {
-		return offer.Offer{}, offer.ErrNotFound
+		return entity.Offer{}, entity.ErrNotFound
 	}
 	if err != nil {
-		return offer.Offer{}, err
+		return entity.Offer{}, err
 	}
 	return row.toDomain(), nil
 }
 
-func (r *OfferRepository) Upsert(ctx context.Context, o offer.Offer) error {
+func (r *OfferRepository) Upsert(ctx context.Context, o entity.Offer) error {
 	_, err := r.db.sql.ExecContext(ctx, `
 		INSERT INTO offers (id, restaurant_id, provider_id, menu_item_id, amount_cents, currency)
 		VALUES ($1, $2, $3, $4, $5, $6)
