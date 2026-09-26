@@ -1,0 +1,93 @@
+# github.com/ChristianDenniss/go-data-model v1.4.0
+## explicit; go 1.23
+github.com/ChristianDenniss/go-data-model/account/entity
+github.com/ChristianDenniss/go-data-model/account/repository
+github.com/ChristianDenniss/go-data-model/brand/entity
+github.com/ChristianDenniss/go-data-model/brand/repository
+github.com/ChristianDenniss/go-data-model/cart/entity
+github.com/ChristianDenniss/go-data-model/cart/repository
+github.com/ChristianDenniss/go-data-model/category/entity
+github.com/ChristianDenniss/go-data-model/category/repository
+github.com/ChristianDenniss/go-data-model/channel/entity
+github.com/ChristianDenniss/go-data-model/channel/repository
+github.com/ChristianDenniss/go-data-model/cuisine/entity
+github.com/ChristianDenniss/go-data-model/cuisine/repository
+github.com/ChristianDenniss/go-data-model/dish/entity
+github.com/ChristianDenniss/go-data-model/dish/repository
+github.com/ChristianDenniss/go-data-model/ingest/entity
+github.com/ChristianDenniss/go-data-model/ingest/repository
+github.com/ChristianDenniss/go-data-model/itemprice/entity
+github.com/ChristianDenniss/go-data-model/itemprice/repository
+github.com/ChristianDenniss/go-data-model/location/entity
+github.com/ChristianDenniss/go-data-model/menu/entity
+github.com/ChristianDenniss/go-data-model/menu/repository
+github.com/ChristianDenniss/go-data-model/money/entity
+github.com/ChristianDenniss/go-data-model/observation/entity
+github.com/ChristianDenniss/go-data-model/observation/repository
+github.com/ChristianDenniss/go-data-model/offer/entity
+github.com/ChristianDenniss/go-data-model/offer/repository
+github.com/ChristianDenniss/go-data-model/order/entity
+github.com/ChristianDenniss/go-data-model/order/repository
+github.com/ChristianDenniss/go-data-model/place/entity
+github.com/ChristianDenniss/go-data-model/place/repository
+github.com/ChristianDenniss/go-data-model/promotion/entity
+github.com/ChristianDenniss/go-data-model/promotion/repository
+github.com/ChristianDenniss/go-data-model/provider/entity
+github.com/ChristianDenniss/go-data-model/provider/repository
+github.com/ChristianDenniss/go-data-model/quoteobs/entity
+github.com/ChristianDenniss/go-data-model/quoteobs/repository
+github.com/ChristianDenniss/go-data-model/resolution/entity
+github.com/ChristianDenniss/go-data-model/resolution/repository
+github.com/ChristianDenniss/go-data-model/restaurant/entity
+github.com/ChristianDenniss/go-data-model/restaurant/repository
+github.com/ChristianDenniss/go-data-model/serviceability/entity
+github.com/ChristianDenniss/go-data-model/serviceability/repository
+github.com/ChristianDenniss/go-data-model/source/entity
+github.com/ChristianDenniss/go-data-model/source/repository
+github.com/ChristianDenniss/go-data-model/user/entity
+github.com/ChristianDenniss/go-data-model/user/repository
+# github.com/jackc/pgpassfile v1.0.0
+## explicit; go 1.12
+github.com/jackc/pgpassfile
+# github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761
+## explicit; go 1.14
+github.com/jackc/pgservicefile
+# github.com/jackc/pgx/v5 v5.7.2
+## explicit; go 1.21
+github.com/jackc/pgx/v5
+github.com/jackc/pgx/v5/internal/iobufpool
+github.com/jackc/pgx/v5/internal/pgio
+github.com/jackc/pgx/v5/internal/sanitize
+github.com/jackc/pgx/v5/internal/stmtcache
+github.com/jackc/pgx/v5/pgconn
+github.com/jackc/pgx/v5/pgconn/ctxwatch
+github.com/jackc/pgx/v5/pgconn/internal/bgreader
+github.com/jackc/pgx/v5/pgproto3
+github.com/jackc/pgx/v5/pgtype
+github.com/jackc/pgx/v5/pgxpool
+github.com/jackc/pgx/v5/stdlib
+# github.com/jackc/puddle/v2 v2.2.2
+## explicit; go 1.19
+github.com/jackc/puddle/v2
+github.com/jackc/puddle/v2/internal/genstack
+# golang.org/x/crypto v0.31.0
+## explicit; go 1.20
+golang.org/x/crypto/pbkdf2
+# golang.org/x/sync v0.10.0
+## explicit; go 1.18
+golang.org/x/sync/semaphore
+# golang.org/x/text v0.21.0
+## explicit; go 1.18
+golang.org/x/text/cases
+golang.org/x/text/internal
+golang.org/x/text/internal/language
+golang.org/x/text/internal/language/compact
+golang.org/x/text/internal/tag
+golang.org/x/text/language
+golang.org/x/text/runes
+golang.org/x/text/secure/bidirule
+golang.org/x/text/secure/precis
+golang.org/x/text/transform
+golang.org/x/text/unicode/bidi
+golang.org/x/text/unicode/norm
+golang.org/x/text/width

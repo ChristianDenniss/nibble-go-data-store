@@ -21,15 +21,10 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.23'
-      - name: Verify modules from GitHub
-        env:
-          GOPRIVATE: github.com/${{ github.repository_owner }}/*
-          GH_PAT: ${{ secrets.GH_PAT }}
+      - name: Vet and build (vendored modules)
         run: |
-          git config --global url."https://x-access-token:${GH_PAT}@github.com/".insteadOf "https://github.com/"
-          go mod download
-          go vet ./...
-          go build ./...
+          go vet -mod=vendor ./...
+          go build -mod=vendor ./...
 
   release:
     name: Tag & Release
