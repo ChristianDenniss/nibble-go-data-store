@@ -15,6 +15,7 @@ var (
 	_ repository.SettingsRepository      = (*UserSettingsRepository)(nil)
 	_ repository.SessionRepository       = (*CompareSessionRepository)(nil)
 	_ repository.OutboundClickRepository = (*OutboundClickRepository)(nil)
+	_ repository.MembershipRepository    = (*UserMembershipRepository)(nil)
 )
 
 type UserRepository struct {
@@ -151,4 +152,34 @@ func nullableBytes(b []byte) interface{} {
 		return nil
 	}
 	return b
+}
+
+type UserMembershipRepository struct {
+	db *DB
+}
+
+func NewUserMembershipRepository(db *DB) *UserMembershipRepository {
+	return &UserMembershipRepository{db: db}
+}
+
+func (r *UserMembershipRepository) ListProductSlugsByUser(ctx context.Context, userID string) ([]string, error) {
+	rows, err := r.db.sql.QueryContext(ctx, `
+		SELECT mp.slug
+		FROM user_memberships um
+		JOIN membership_products mp ON mp.id = um.membership_product_id
+		WHERE um.user_id = $1
+		ORDER BY mp.slug`, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var slugs []string
+	for rows.Next() {
+		var slug string
+		if err := rows.Scan(&slug); err != nil {
+			return nil, err
+		}
+		slugs = append(slugs, slug)
+	}
+	return slugs, rows.Err()
 }

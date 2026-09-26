@@ -89,13 +89,16 @@ func (r *QuoteObservationRepository) GetByID(ctx context.Context, id string) (qu
 	return obs, err
 }
 
-func (r *QuoteObservationRepository) Latest(ctx context.Context, sourceStoreID, geohash, mode, deliveryExecutor, tier string) (quoteentity.Observation, error) {
+func (r *QuoteObservationRepository) Latest(ctx context.Context, sourceStoreID, geohash, mode, deliveryExecutor, tier string, basketSubtotalCents int64) (quoteentity.Observation, error) {
+	bucket := quoteentity.BasketSubtotalBucket(basketSubtotalCents)
 	var id string
 	err := r.db.sql.QueryRowContext(ctx, `
 		SELECT id FROM quote_observations
 		WHERE source_store_id = $1 AND dropoff_geohash = $2 AND fulfillment_mode = $3
 			AND delivery_executor = $4 AND membership_tier = $5
-		ORDER BY observed_at DESC LIMIT 1`, sourceStoreID, geohash, mode, deliveryExecutor, tier).Scan(&id)
+			AND basket_subtotal_cents = $6
+		ORDER BY observed_at DESC LIMIT 1`,
+		sourceStoreID, geohash, mode, deliveryExecutor, tier, bucket).Scan(&id)
 	if errors.Is(err, sql.ErrNoRows) {
 		return quoteentity.Observation{}, quoteentity.ErrNotFound
 	}
