@@ -3,7 +3,7 @@ module github.com/ChristianDenniss/go-data-store
 go 1.23
 
 require (
-	github.com/ChristianDenniss/go-data-model v1.6.0
+	github.com/ChristianDenniss/go-data-model v1.5.1-0.20260926200135-ea76612cf120
 	github.com/jackc/pgx/v5 v5.7.2
 )
 
