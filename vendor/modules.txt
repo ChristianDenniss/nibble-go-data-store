@@ -1,4 +1,4 @@
-# github.com/ChristianDenniss/go-data-model v1.7.0
+# github.com/ChristianDenniss/go-data-model v1.8.0
 ## explicit; go 1.23
 github.com/ChristianDenniss/go-data-model/account/entity
 github.com/ChristianDenniss/go-data-model/account/repository
