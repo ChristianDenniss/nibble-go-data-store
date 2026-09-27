@@ -1,4 +1,4 @@
-# github.com/ChristianDenniss/go-data-model v1.4.0
+# github.com/ChristianDenniss/go-data-model v1.8.0
 ## explicit; go 1.23
 github.com/ChristianDenniss/go-data-model/account/entity
 github.com/ChristianDenniss/go-data-model/account/repository
@@ -20,6 +20,8 @@ github.com/ChristianDenniss/go-data-model/ingest/repository
 github.com/ChristianDenniss/go-data-model/itemprice/entity
 github.com/ChristianDenniss/go-data-model/itemprice/repository
 github.com/ChristianDenniss/go-data-model/location/entity
+github.com/ChristianDenniss/go-data-model/market/entity
+github.com/ChristianDenniss/go-data-model/market/repository
 github.com/ChristianDenniss/go-data-model/menu/entity
 github.com/ChristianDenniss/go-data-model/menu/repository
 github.com/ChristianDenniss/go-data-model/money/entity
@@ -45,6 +47,8 @@ github.com/ChristianDenniss/go-data-model/serviceability/entity
 github.com/ChristianDenniss/go-data-model/serviceability/repository
 github.com/ChristianDenniss/go-data-model/source/entity
 github.com/ChristianDenniss/go-data-model/source/repository
+github.com/ChristianDenniss/go-data-model/storefront/entity
+github.com/ChristianDenniss/go-data-model/storefront/repository
 github.com/ChristianDenniss/go-data-model/user/entity
 github.com/ChristianDenniss/go-data-model/user/repository
 # github.com/jackc/pgpassfile v1.0.0

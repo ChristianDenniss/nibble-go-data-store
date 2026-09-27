@@ -22,13 +22,13 @@ func NewRestaurantRepository(db *DB) *RestaurantRepository {
 func (r *RestaurantRepository) GetByID(ctx context.Context, id string) (entity.Restaurant, error) {
 	var out entity.Restaurant
 	err := r.db.sql.QueryRowContext(ctx, `
-		SELECT id, name, latitude, longitude, address, city, region, postal_code, rating_average, rating_count
+		SELECT id, name, latitude, longitude, address, city, region, postal_code, rating_average, rating_count, phone, app_url
 		FROM restaurants
 		WHERE id = $1`, id).Scan(
 		&out.ID, &out.Name,
 		&out.Location.Latitude, &out.Location.Longitude, &out.Location.Address,
 		&out.Location.City, &out.Location.Region, &out.Location.PostalCode,
-		&out.Rating.Average, &out.Rating.Count)
+		&out.Rating.Average, &out.Rating.Count, &out.Phone, &out.AppURL)
 	if errors.Is(err, sql.ErrNoRows) {
 		return entity.Restaurant{}, entity.ErrNotFound
 	}
@@ -44,6 +44,10 @@ func (r *RestaurantRepository) GetByID(ctx context.Context, id string) (entity.R
 	if err != nil {
 		return entity.Restaurant{}, err
 	}
+	out.Hours, err = listHours(ctx, r.db.sql, id)
+	if err != nil {
+		return entity.Restaurant{}, err
+	}
 	return out, nil
 }
 
@@ -55,8 +59,8 @@ func (r *RestaurantRepository) Upsert(ctx context.Context, in entity.Restaurant)
 	defer func() { _ = tx.Rollback() }()
 
 	_, err = tx.ExecContext(ctx, `
-		INSERT INTO restaurants (id, name, latitude, longitude, address, city, region, postal_code, rating_average, rating_count)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+		INSERT INTO restaurants (id, name, latitude, longitude, address, city, region, postal_code, rating_average, rating_count, phone, app_url)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
 		ON CONFLICT (id) DO UPDATE SET
 			name = EXCLUDED.name,
 			latitude = EXCLUDED.latitude,
@@ -67,11 +71,13 @@ func (r *RestaurantRepository) Upsert(ctx context.Context, in entity.Restaurant)
 			postal_code = EXCLUDED.postal_code,
 			rating_average = EXCLUDED.rating_average,
 			rating_count = EXCLUDED.rating_count,
+			phone = EXCLUDED.phone,
+			app_url = EXCLUDED.app_url,
 			updated_at = now()`,
 		in.ID, in.Name,
 		in.Location.Latitude, in.Location.Longitude, in.Location.Address,
 		in.Location.City, in.Location.Region, in.Location.PostalCode,
-		in.Rating.Average, in.Rating.Count)
+		in.Rating.Average, in.Rating.Count, in.Phone, in.AppURL)
 	if err != nil {
 		return err
 	}
@@ -94,7 +100,41 @@ func (r *RestaurantRepository) Upsert(ctx context.Context, in entity.Restaurant)
 			return err
 		}
 	}
+	// Ingest sources that do not report hours leave Hours nil; keep the stored schedule then.
+	if in.Hours != nil {
+		if _, err := tx.ExecContext(ctx, `DELETE FROM restaurant_hours WHERE restaurant_id = $1`, in.ID); err != nil {
+			return err
+		}
+		for _, h := range in.Hours {
+			if _, err := tx.ExecContext(ctx, `
+				INSERT INTO restaurant_hours (restaurant_id, service, day_of_week, opens, closes)
+				VALUES ($1, $2, $3, $4, $5)`, in.ID, h.Service, h.DayOfWeek, h.Opens, h.Closes); err != nil {
+				return err
+			}
+		}
+	}
 	return tx.Commit()
+}
+
+func listHours(ctx context.Context, db *sql.DB, restaurantID string) ([]entity.Hours, error) {
+	rows, err := db.QueryContext(ctx, `
+		SELECT service, day_of_week, opens, closes
+		FROM restaurant_hours
+		WHERE restaurant_id = $1
+		ORDER BY service, day_of_week, opens`, restaurantID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []entity.Hours
+	for rows.Next() {
+		var h entity.Hours
+		if err := rows.Scan(&h.Service, &h.DayOfWeek, &h.Opens, &h.Closes); err != nil {
+			return nil, err
+		}
+		out = append(out, h)
+	}
+	return out, rows.Err()
 }
 
 func listIDs(ctx context.Context, db *sql.DB, query, id string) ([]string, error) {
