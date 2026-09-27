@@ -201,8 +201,8 @@ func NewSourceItemRepository(db *DB) *SourceItemRepository {
 func (r *SourceItemRepository) GetByID(ctx context.Context, id string) (entity.Item, error) {
 	var out entity.Item
 	err := r.db.sql.QueryRowContext(ctx, `
-		SELECT id, source_category_id, external_item_id, name, description, available FROM source_items WHERE id = $1`, id).
-		Scan(&out.ID, &out.SourceCategoryID, &out.ExternalItemID, &out.Name, &out.Description, &out.Available)
+		SELECT id, source_category_id, external_item_id, name, description, available, image_url FROM source_items WHERE id = $1`, id).
+		Scan(&out.ID, &out.SourceCategoryID, &out.ExternalItemID, &out.Name, &out.Description, &out.Available, &out.ImageURL)
 	if errors.Is(err, sql.ErrNoRows) {
 		return entity.Item{}, entity.ErrNotFound
 	}
@@ -211,7 +211,7 @@ func (r *SourceItemRepository) GetByID(ctx context.Context, id string) (entity.I
 
 func (r *SourceItemRepository) ListByCategory(ctx context.Context, sourceCategoryID string) ([]entity.Item, error) {
 	rows, err := r.db.sql.QueryContext(ctx, `
-		SELECT id, source_category_id, external_item_id, name, description, available FROM source_items WHERE source_category_id = $1`, sourceCategoryID)
+		SELECT id, source_category_id, external_item_id, name, description, available, image_url FROM source_items WHERE source_category_id = $1`, sourceCategoryID)
 	if err != nil {
 		return nil, err
 	}
@@ -219,7 +219,7 @@ func (r *SourceItemRepository) ListByCategory(ctx context.Context, sourceCategor
 	var out []entity.Item
 	for rows.Next() {
 		var it entity.Item
-		if err := rows.Scan(&it.ID, &it.SourceCategoryID, &it.ExternalItemID, &it.Name, &it.Description, &it.Available); err != nil {
+		if err := rows.Scan(&it.ID, &it.SourceCategoryID, &it.ExternalItemID, &it.Name, &it.Description, &it.Available, &it.ImageURL); err != nil {
 			return nil, err
 		}
 		out = append(out, it)
@@ -229,15 +229,16 @@ func (r *SourceItemRepository) ListByCategory(ctx context.Context, sourceCategor
 
 func (r *SourceItemRepository) Upsert(ctx context.Context, item entity.Item) error {
 	_, err := r.db.sql.ExecContext(ctx, `
-		INSERT INTO source_items (id, source_category_id, external_item_id, name, description, available)
-		VALUES ($1, $2, $3, $4, $5, $6)
+		INSERT INTO source_items (id, source_category_id, external_item_id, name, description, available, image_url)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		ON CONFLICT (id) DO UPDATE SET
 			source_category_id = EXCLUDED.source_category_id,
 			external_item_id = EXCLUDED.external_item_id,
 			name = EXCLUDED.name,
 			description = EXCLUDED.description,
 			available = EXCLUDED.available,
+			image_url = COALESCE(NULLIF(EXCLUDED.image_url, ''), source_items.image_url),
 			updated_at = now()`,
-		item.ID, item.SourceCategoryID, item.ExternalItemID, item.Name, item.Description, item.Available)
+		item.ID, item.SourceCategoryID, item.ExternalItemID, item.Name, item.Description, item.Available, item.ImageURL)
 	return err
 }
