@@ -94,7 +94,7 @@ func (r *PromotionRepository) ListActiveWithTargets(ctx context.Context, at time
 	targets, err := r.db.sql.QueryContext(ctx, `
 		SELECT t.id, t.promotion_id, COALESCE(t.place_id, ''), COALESCE(t.source_store_id, ''),
 			COALESCE(t.source_item_id, ''), COALESCE(t.dish_id, ''), COALESCE(t.brand_id, ''),
-			COALESCE(t.legacy_restaurant_id, '')
+			COALESCE(t.legacy_restaurant_id, ''), COALESCE(t.region, ''), COALESCE(t.country, '')
 		FROM promotion_targets t
 		JOIN promotions p ON p.id = t.promotion_id
 		WHERE p.starts_at <= $1 AND p.ends_at >= $1
@@ -105,7 +105,7 @@ func (r *PromotionRepository) ListActiveWithTargets(ctx context.Context, at time
 	defer targets.Close()
 	for targets.Next() {
 		var t entity.Target
-		if err := targets.Scan(&t.ID, &t.PromotionID, &t.PlaceID, &t.SourceStoreID, &t.SourceItemID, &t.DishID, &t.BrandID, &t.LegacyRestaurantID); err != nil {
+		if err := targets.Scan(&t.ID, &t.PromotionID, &t.PlaceID, &t.SourceStoreID, &t.SourceItemID, &t.DishID, &t.BrandID, &t.LegacyRestaurantID, &t.Region, &t.Country); err != nil {
 			return nil, err
 		}
 		if i, ok := index[t.PromotionID]; ok {
@@ -142,15 +142,15 @@ func (r *PromotionRepository) UpsertConstraint(ctx context.Context, c entity.Con
 
 func (r *PromotionRepository) UpsertTarget(ctx context.Context, t entity.Target) error {
 	_, err := r.db.sql.ExecContext(ctx, `
-		INSERT INTO promotion_targets (id, promotion_id, place_id, source_store_id, source_item_id, dish_id, brand_id, legacy_restaurant_id)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		INSERT INTO promotion_targets (id, promotion_id, place_id, source_store_id, source_item_id, dish_id, brand_id, legacy_restaurant_id, region, country)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 		ON CONFLICT (id) DO UPDATE SET
 			promotion_id = EXCLUDED.promotion_id, place_id = EXCLUDED.place_id,
 			source_store_id = EXCLUDED.source_store_id, source_item_id = EXCLUDED.source_item_id,
 			dish_id = EXCLUDED.dish_id, brand_id = EXCLUDED.brand_id,
-			legacy_restaurant_id = EXCLUDED.legacy_restaurant_id`,
+			legacy_restaurant_id = EXCLUDED.legacy_restaurant_id, region = EXCLUDED.region, country = EXCLUDED.country`,
 		t.ID, t.PromotionID, nullString(t.PlaceID), nullString(t.SourceStoreID), nullString(t.SourceItemID),
-		nullString(t.DishID), nullString(t.BrandID), nullString(t.LegacyRestaurantID))
+		nullString(t.DishID), nullString(t.BrandID), nullString(t.LegacyRestaurantID), nullString(t.Region), nullString(t.Country))
 	return err
 }
 

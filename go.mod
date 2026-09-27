@@ -7,6 +7,8 @@ require (
 	github.com/jackc/pgx/v5 v5.7.2
 )
 
+replace github.com/ChristianDenniss/go-data-model => ../nibble-go-data-model
+
 require (
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	cartentity "github.com/ChristianDenniss/go-data-model/cart/entity"
 	categoryentity "github.com/ChristianDenniss/go-data-model/category/entity"
@@ -35,6 +36,10 @@ func (r *StorefrontRepository) LoadBootstrap(ctx context.Context, accountID stri
 		return entity.Catalog{}, err
 	}
 	out := entity.Catalog{Account: account}
+	out.Deals, err = (&PromotionRepository{db: r.db}).ListActiveWithTargets(ctx, time.Now())
+	if err != nil {
+		return entity.Catalog{}, err
+	}
 	out.Providers, err = r.listProviders(ctx)
 	if err != nil {
 		return entity.Catalog{}, err
@@ -172,6 +177,10 @@ func (r *StorefrontRepository) LoadCatalog(ctx context.Context, accountID string
 	}
 
 	out := entity.Catalog{Account: account}
+	out.Deals, err = (&PromotionRepository{db: r.db}).ListActiveWithTargets(ctx, time.Now())
+	if err != nil {
+		return entity.Catalog{}, err
+	}
 
 	out.Providers, err = r.listProviders(ctx)
 	if err != nil {

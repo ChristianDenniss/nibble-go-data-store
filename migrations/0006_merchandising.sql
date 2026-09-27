@@ -6,6 +6,8 @@ ALTER TABLE promotions ADD COLUMN IF NOT EXISTS description TEXT NOT NULL DEFAUL
 
 ALTER TABLE promotion_targets
     ADD COLUMN IF NOT EXISTS legacy_restaurant_id TEXT REFERENCES restaurants (id) ON DELETE CASCADE;
+ALTER TABLE promotion_targets ADD COLUMN IF NOT EXISTS region TEXT NOT NULL DEFAULT '';
+ALTER TABLE promotion_targets ADD COLUMN IF NOT EXISTS country TEXT NOT NULL DEFAULT '';
 
 CREATE INDEX IF NOT EXISTS idx_promotions_window ON promotions (starts_at, ends_at);
 CREATE INDEX IF NOT EXISTS idx_promotion_targets_promotion ON promotion_targets (promotion_id);
