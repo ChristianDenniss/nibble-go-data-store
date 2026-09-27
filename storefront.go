@@ -100,7 +100,7 @@ func (r *StorefrontRepository) SearchRestaurants(ctx context.Context, q storefro
 	}
 	args = append(args, (page-1)*pageSize, pageSize)
 	rows, err := r.db.sql.QueryContext(ctx, fmt.Sprintf(`
-		SELECT r.id, r.name, r.latitude, r.longitude, r.address, r.city, r.region, r.postal_code, r.rating_average, r.rating_count, r.phone, r.app_url
+		SELECT r.id, r.name, r.image_url, r.latitude, r.longitude, r.address, r.city, r.region, r.postal_code, r.rating_average, r.rating_count, r.phone, r.app_url
 		FROM restaurants r WHERE %s ORDER BY %s OFFSET $%d LIMIT $%d`, base, order, len(args)-1, len(args)), args...)
 	if err != nil {
 		return storefrontrepo.RestaurantPage{}, err
@@ -109,7 +109,7 @@ func (r *StorefrontRepository) SearchRestaurants(ctx context.Context, q storefro
 	out := make([]restaurantentity.Restaurant, 0, pageSize)
 	for rows.Next() {
 		var rest restaurantentity.Restaurant
-		if err := rows.Scan(&rest.ID, &rest.Name, &rest.Location.Latitude, &rest.Location.Longitude, &rest.Location.Address, &rest.Location.City, &rest.Location.Region, &rest.Location.PostalCode, &rest.Rating.Average, &rest.Rating.Count, &rest.Phone, &rest.AppURL); err != nil {
+		if err := rows.Scan(&rest.ID, &rest.Name, &rest.ImageURL, &rest.Location.Latitude, &rest.Location.Longitude, &rest.Location.Address, &rest.Location.City, &rest.Location.Region, &rest.Location.PostalCode, &rest.Rating.Average, &rest.Rating.Count, &rest.Phone, &rest.AppURL); err != nil {
 			return storefrontrepo.RestaurantPage{}, err
 		}
 		// Search results are summary cards. Filter membership is already
@@ -271,7 +271,7 @@ func (r *StorefrontRepository) listCuisines(ctx context.Context) ([]cuisineentit
 
 func (r *StorefrontRepository) listRestaurants(ctx context.Context) ([]restaurantentity.Restaurant, error) {
 	rows, err := r.db.sql.QueryContext(ctx, `
-		SELECT id, name, latitude, longitude, address, city, region, postal_code, rating_average, rating_count, phone, app_url
+		SELECT id, name, image_url, latitude, longitude, address, city, region, postal_code, rating_average, rating_count, phone, app_url
 		FROM restaurants ORDER BY name`)
 	if err != nil {
 		return nil, err
@@ -281,7 +281,7 @@ func (r *StorefrontRepository) listRestaurants(ctx context.Context) ([]restauran
 	for rows.Next() {
 		var rest restaurantentity.Restaurant
 		if err := rows.Scan(
-			&rest.ID, &rest.Name,
+			&rest.ID, &rest.Name, &rest.ImageURL,
 			&rest.Location.Latitude, &rest.Location.Longitude, &rest.Location.Address,
 			&rest.Location.City, &rest.Location.Region, &rest.Location.PostalCode,
 			&rest.Rating.Average, &rest.Rating.Count, &rest.Phone, &rest.AppURL,

@@ -22,10 +22,10 @@ func NewRestaurantRepository(db *DB) *RestaurantRepository {
 func (r *RestaurantRepository) GetByID(ctx context.Context, id string) (entity.Restaurant, error) {
 	var out entity.Restaurant
 	err := r.db.sql.QueryRowContext(ctx, `
-		SELECT id, name, latitude, longitude, address, city, region, postal_code, rating_average, rating_count, phone, app_url
+		SELECT id, name, image_url, latitude, longitude, address, city, region, postal_code, rating_average, rating_count, phone, app_url
 		FROM restaurants
 		WHERE id = $1`, id).Scan(
-		&out.ID, &out.Name,
+		&out.ID, &out.Name, &out.ImageURL,
 		&out.Location.Latitude, &out.Location.Longitude, &out.Location.Address,
 		&out.Location.City, &out.Location.Region, &out.Location.PostalCode,
 		&out.Rating.Average, &out.Rating.Count, &out.Phone, &out.AppURL)
@@ -59,8 +59,8 @@ func (r *RestaurantRepository) Upsert(ctx context.Context, in entity.Restaurant)
 	defer func() { _ = tx.Rollback() }()
 
 	_, err = tx.ExecContext(ctx, `
-		INSERT INTO restaurants (id, name, latitude, longitude, address, city, region, postal_code, rating_average, rating_count, phone, app_url)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+		INSERT INTO restaurants (id, name, image_url, latitude, longitude, address, city, region, postal_code, rating_average, rating_count, phone, app_url)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
 		ON CONFLICT (id) DO UPDATE SET
 			name = EXCLUDED.name,
 			latitude = EXCLUDED.latitude,
@@ -72,10 +72,11 @@ func (r *RestaurantRepository) Upsert(ctx context.Context, in entity.Restaurant)
 			rating_average = EXCLUDED.rating_average,
 			rating_count = EXCLUDED.rating_count,
 			phone = EXCLUDED.phone,
+			image_url = COALESCE(NULLIF(EXCLUDED.image_url, ''), restaurants.image_url),
 			app_url = EXCLUDED.app_url,
 			updated_at = now()`,
 		in.ID, in.Name,
-		in.Location.Latitude, in.Location.Longitude, in.Location.Address,
+		in.ImageURL, in.Location.Latitude, in.Location.Longitude, in.Location.Address,
 		in.Location.City, in.Location.Region, in.Location.PostalCode,
 		in.Rating.Average, in.Rating.Count, in.Phone, in.AppURL)
 	if err != nil {
