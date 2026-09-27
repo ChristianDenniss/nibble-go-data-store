@@ -67,7 +67,8 @@ func (r *ItemPriceObservationRepository) LatestByItem(ctx context.Context, sourc
 func (r *ItemPriceObservationRepository) Insert(ctx context.Context, obs itempriceentity.Observation) error {
 	_, err := r.db.sql.ExecContext(ctx, `
 		INSERT INTO item_price_observations (id, source_item_id, ingest_run_id, amount_cents, currency, fulfillment_mode, delivery_executor, observed_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		ON CONFLICT (id) DO NOTHING`,
 		obs.ID, obs.SourceItemID, nullString(obs.IngestRunID), obs.Price.AmountCents, obs.Price.Currency, obs.FulfillmentMode, obs.DeliveryExecutor, obs.ObservedAt)
 	return err
 }
@@ -118,7 +119,8 @@ func (r *QuoteObservationRepository) Insert(ctx context.Context, obs quoteentity
 		INSERT INTO quote_observations (
 			id, source_store_id, channel_id, fulfillment_mode, delivery_executor, dropoff_geohash,
 			membership_tier, quote_kind, basket_subtotal_cents, observed_at, ingest_run_id)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+		ON CONFLICT (id) DO NOTHING`,
 		obs.ID, obs.SourceStoreID, obs.ChannelID, obs.FulfillmentMode, obs.DeliveryExecutor, obs.DropoffGeohash,
 		obs.MembershipTier, obs.QuoteKind, obs.BasketSubtotalCents, obs.ObservedAt, nullString(obs.IngestRunID))
 	if err != nil {
@@ -127,7 +129,8 @@ func (r *QuoteObservationRepository) Insert(ctx context.Context, obs quoteentity
 	for _, line := range obs.FeeLines {
 		_, err = tx.ExecContext(ctx, `
 			INSERT INTO quote_fee_lines (id, quote_obs_id, kind, amount_cents, currency, percent, threshold_cents)
-			VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+			VALUES ($1, $2, $3, $4, $5, $6, $7)
+			ON CONFLICT (id) DO NOTHING`,
 			line.ID, obs.ID, line.Kind, line.Amount.AmountCents, line.Amount.Currency, line.Percent, line.ThresholdCents)
 		if err != nil {
 			return err
