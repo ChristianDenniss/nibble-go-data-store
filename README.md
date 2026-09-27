@@ -7,3 +7,16 @@ The persistence adapter. Today that is Postgres: connection, migrations, and rep
 `nibble-api-engine` opens a store and injects the concrete repos into domain services. It never writes SQL.
 
 If a second engine is added later, it belongs here as another package (`sqlite`, …), not inside the domain module and not as its own network service.
+
+## Catalog read model
+
+`CatalogRepository` stores immutable import envelopes plus current provider,
+restaurant and item rows (migration 0005). Imports are checksum-idempotent and
+atomic; repeatable-read queries cannot mix generations. Older directly observed
+menus cannot overwrite newer ones. Internal metadata retains source provenance;
+the domain service controls the customer projection. Existing checkout quote
+tables remain separate because public menus do not establish address-specific
+fees or delivery context.
+
+`CATALOG_TEST_DATABASE_URL` enables the integration test against a disposable
+Postgres database. See `VENDOR-PATCHES.md` for the unreleased dependency bridge.
